@@ -18,6 +18,7 @@ public class ExtraHours {
     private Long id;
     private String rut;
     private Date date;
+    //Minutos que sobrepasan a las 18:00
     private int numExtraHours;
     //debe inicial tabla en false.
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")

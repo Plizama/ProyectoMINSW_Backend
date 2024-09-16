@@ -8,18 +8,19 @@ import jakarta.persistence.*;
 import java.util.Date;
 
 @Entity
-@Table(name = "deduction_hours")
+@Table(name = "discount_hours")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DeductionsHours {
+public class DiscountHours {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(unique = true, nullable = false)
     private Long id;
     private String rut;
     private Date date;
-    private int numDeductionsHours;
+    //Minutos de ingreso desdpués de las 08:00
+    private int numDiscountHours;
     //debe inicial tabla en false.
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
     private boolean approval;

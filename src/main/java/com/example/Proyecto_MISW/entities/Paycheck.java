@@ -21,8 +21,8 @@ public class Paycheck {
     private int month;
     private int monthlySalary;
     private int salaryBonus;
-    private int salaryDeductions;
-    private int deductionsHours;
+    private int salaryDiscount;
+    private int discountHours;
     private int extraHoursBonus;
     private int totalSalary;
 }
