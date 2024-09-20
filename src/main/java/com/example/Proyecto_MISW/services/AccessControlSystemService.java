@@ -1,9 +1,6 @@
 package com.example.Proyecto_MISW.services;
 
-import com.example.Proyecto_MISW.entities.DiscountHours;
-import com.example.Proyecto_MISW.entities.ExtraHours;
-import com.example.Proyecto_MISW.repositories.DiscountHoursRepository;
-import com.example.Proyecto_MISW.repositories.ExtraHoursRepository;
+import com.example.Proyecto_MISW.entities.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,10 +19,18 @@ import java.util.stream.Collectors;
 public class AccessControlSystemService {
 
     @Autowired
-    private DiscountHoursRepository discountHoursRepository;
+    private ArrivalTimeService arrivalTimeService;
 
     @Autowired
-    private ExtraHoursRepository extraHoursRepository;
+    private DepartureTimeService departureTimeService;
+
+    @Autowired
+    private DiscountHoursService discountHoursService;
+    @Autowired
+    private ExtraHoursService extraHoursService;
+
+    @Autowired
+    private EmployeeService employeeService;
 
     public void processAccessFile(InputStream inputStream) {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
@@ -35,8 +40,13 @@ public class AccessControlSystemService {
 
             // Mapa para almacenar las horas de ingreso y salida por RUT y fecha
             Map<String, List<LocalTime>> accessMap = new HashMap<>();
+            Map<String, Set<String>> employeeAccessByDate = new HashMap<>(); // Para almacenar RUTs por fecha
 
-            // Recorrer todas las líneas
+            // Obtener la lista de todos los empleados desde el servicio
+            List<Employee> employees = employeeService.getEmployees();
+            Set<String> allRuts = employees.stream().map(Employee::getRut).collect(Collectors.toSet());
+
+            // Recorrer todas las líneas del archivo
             for (String line : lines) {
                 String[] fields = line.split(";");
                 LocalDate date = LocalDate.parse(fields[0], dateFormatter);
@@ -48,6 +58,10 @@ public class AccessControlSystemService {
 
                 // Añadir la hora de ingreso/salida al mapa
                 accessMap.computeIfAbsent(key, k -> new ArrayList<>()).add(time);
+
+                // Almacenar RUT por fecha
+                String dateKey = date.toString();
+                employeeAccessByDate.computeIfAbsent(dateKey, k -> new HashSet<>()).add(rut);
             }
 
             // Procesar cada trabajador
@@ -65,47 +79,97 @@ public class AccessControlSystemService {
                     LocalTime ingresoTime = times.get(0);
                     LocalTime salidaTime = times.get(1);
 
-                    // Procesar horas de ingreso y salida
-                    processDiscountHours(rut, date, ingresoTime);
-                    processExtraHours(rut, date, salidaTime);
+                    // Almacenar horas de entrada y salida utilizando los servicios correspondientes
+                    arrivalTimeService.saveArrivalTime(rut, date, ingresoTime);
+                    departureTimeService.saveDepartureTime(rut, date, salidaTime);
                 }
             }
+
+            // Verificar que todos los empleados tengan registros por fecha
+            for (Map.Entry<String, Set<String>> dateEntry : employeeAccessByDate.entrySet()) {
+                LocalDate date = LocalDate.parse(dateEntry.getKey());
+
+                // Comparar RUTs registrados ese día con todos los RUTs de empleados
+                Set<String> rutsForThatDate = dateEntry.getValue();
+                for (String rut : allRuts) {
+                    if (!rutsForThatDate.contains(rut)) {
+                        // Si falta un RUT, agregar un registro en DiscountHours con 600 minutos
+                        DiscountHours discountHours = new DiscountHours();
+                        discountHours.setRut(rut);
+                        discountHours.setDate(java.sql.Date.valueOf(date));
+                        discountHours.setNumDiscountHours(600); // 600 minutos de descuento
+                        discountHours.setApproval(false);  // Por defecto no aprobado
+
+                        // Guardar el registro de descuento
+                        discountHoursService.saveDiscountHours(discountHours);
+                    }
+                }
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void processDiscountHours(String rut, LocalDate date, LocalTime time) {
+
+    public void processArrivalTimesForDiscounts() {
+        // Obtener todos los registros de llegada
+        List<ArrivalTime> arrivalTimes = arrivalTimeService.getAllArrivalTimes();
+
+        // Definir la hora de inicio del trabajo (08:00)
         LocalTime startWorkTime = LocalTime.of(8, 0);
 
-        if (time.isAfter(startWorkTime)) {
-            long minutesLate = Duration.between(startWorkTime, time).toMinutes();
+        // Procesar cada llegada
+        for (ArrivalTime arrival : arrivalTimes) {
+            LocalTime arrivalTime = arrival.getArrival_time();
 
-            DiscountHours discountHours = new DiscountHours();
-            discountHours.setRut(rut);
-            discountHours.setDate(java.sql.Date.valueOf(date));
-            discountHours.setNumDiscountHours((int) minutesLate);
-            discountHours.setApproval(false);
+            // Si la hora de llegada es posterior a las 08:00
+            if (arrivalTime.isAfter(startWorkTime)) {
+                // Calcular los minutos de retraso
+                long minutesLate = Duration.between(startWorkTime, arrivalTime).toMinutes();
 
-            discountHoursRepository.save(discountHours);
+                // Crear un nuevo registro de DiscountHours
+                DiscountHours discountHours = new DiscountHours();
+                discountHours.setRut(arrival.getRut());
+                discountHours.setDate(arrival.getDate());
+                discountHours.setNumDiscountHours((int) minutesLate);
+                discountHours.setApproval(false);  // Por defecto, no aprobado
+
+                // Guardar el registro en la base de datos
+                discountHoursService.saveDiscountHours(discountHours);
+            }
         }
     }
+    public void processDepartureTimesForExtraHours() {
+        // Obtener todos los registros de salida
+        List<DepartureTime> departureTimes = departureTimeService.getAllDepartureTimes();
 
-    private void processExtraHours(String rut, LocalDate date, LocalTime time) {
+        // Definir la hora de finalización del trabajo (18:00)
         LocalTime endWorkTime = LocalTime.of(18, 0);
 
-        if (time.isAfter(endWorkTime)) {
-            long extraMinutes = Duration.between(endWorkTime, time).toMinutes();
+        // Procesar cada registro de salida
+        for (DepartureTime departure : departureTimes) {
+            LocalTime departureTime = departure.getDeparture_time();
 
-            ExtraHours extraHours = new ExtraHours();
-            extraHours.setRut(rut);
-            extraHours.setDate(java.sql.Date.valueOf(date));
-            extraHours.setNumExtraHours((int) extraMinutes);
-            extraHours.setApproval(false);
+            // Si la hora de salida es posterior a las 18:00
+            if (departureTime.isAfter(endWorkTime)) {
+                // Calcular los minutos de horas extra
+                long extraMinutes = Duration.between(endWorkTime, departureTime).toMinutes();
 
-            extraHoursRepository.save(extraHours);
+                // Crear un nuevo registro de ExtraHours
+                ExtraHours extraHours = new ExtraHours();
+                extraHours.setRut(departure.getRut());
+                extraHours.setDate(departure.getDate());
+                extraHours.setNumExtraHours((int) extraMinutes);
+                extraHours.setApproval(false);  // Por defecto, no aprobado
+
+                // Guardar el registro en la base de datos
+                extraHoursService.saveExtraHours(extraHours);
+            }
         }
     }
+
 }
+
 
 

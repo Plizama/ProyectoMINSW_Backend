@@ -10,8 +10,13 @@ import java.util.ArrayList;
 @Service
 public class EmployeeService {
     @Autowired
-    EmployeeRepositoy employeeRepositoy;
-    public ArrayList<Employee> getEmployees(){
+    private EmployeeRepositoy employeeRepositoy;
+
+    public ArrayList<Employee> getEmployees() {
         return (ArrayList<Employee>) employeeRepositoy.findAll();
+    }
+
+    public Employee findByRut(String rut) {
+        return employeeRepositoy.findByRut(rut);
     }
 }

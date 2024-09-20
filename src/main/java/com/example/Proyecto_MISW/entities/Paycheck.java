@@ -19,10 +19,19 @@ public class Paycheck {
     private String rut;
     private int year;
     private int month;
+    //Salario Fijo Mensual
     private int monthlySalary;
+    //Bonificación por años de servicio
     private int salaryBonus;
-    private int salaryDiscount;
+    //Descuento por atrasos
     private int discountHours;
+    //Pago de horas extra
     private int extraHoursBonus;
+    //Descuentos legales
+    //Decuentos seguridad social (cotizaciones)
+    private int SocialSecurityDiscount;
+    //Descuentos Salud
+    private int HealthDiscount;
+    //Salario Liquido
     private int totalSalary;
 }

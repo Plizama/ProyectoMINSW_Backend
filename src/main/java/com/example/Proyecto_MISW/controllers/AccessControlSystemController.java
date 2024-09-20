@@ -30,4 +30,13 @@ public class AccessControlSystemController {
             return "Error al procesar el archivo: " + e.getMessage();
         }
     }
+    @PostMapping("/process-discounts")
+    public void processDiscounts() {
+        accessControlSystemService.processArrivalTimesForDiscounts();
+    }
+    @PostMapping("/process-extra-hours")
+    public void processExtraHours() {
+        accessControlSystemService.processDepartureTimesForExtraHours();
+    }
+
 }
