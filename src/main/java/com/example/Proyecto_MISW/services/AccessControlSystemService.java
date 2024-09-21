@@ -34,6 +34,7 @@ public class AccessControlSystemService {
 
     public void processAccessFile(InputStream inputStream) {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+            //Lee archivo por lineas
             List<String> lines = reader.lines().collect(Collectors.toList());
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
             DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");

@@ -13,18 +13,15 @@ public class PaycheckController {
     private PaycheckService paycheckService;
 
     // Endpoint para calcular las nóminas para un mes y año específicos con respuesta vacía
-    @GetMapping("/calculate")
-    public ResponseEntity<Void> calculatePaychecks(@RequestParam("year") int year, @RequestParam("month") int month) {
-        // Llama al servicio para calcular las nóminas
+    @GetMapping("/calculate/{year}/{month}")
+    public ResponseEntity<Void> calculatePaychecks(@PathVariable int year, @PathVariable int month) {
         paycheckService.calculatePaychecks(month, year);
-
-        // Retorna una respuesta sin contenido
         return ResponseEntity.noContent().build();
     }
-    @GetMapping("/")
-    public ResponseEntity<Paycheck> getPaycheckDetails(@RequestParam("rut") String rut,
-                                                       @RequestParam("year") int year,
-                                                       @RequestParam("month") int month) {
+    @GetMapping("/paycheck/{rut}/{year}/{month}")
+    public ResponseEntity<Paycheck> getPaycheckDetails(@PathVariable String rut,
+                                                       @PathVariable int year,
+                                                       @PathVariable int month) {
         Paycheck paycheck = paycheckService.getPaycheckByRutAndMonth(rut, month, year);
 
         if (paycheck != null) {

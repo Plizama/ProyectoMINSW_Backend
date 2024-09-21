@@ -13,10 +13,6 @@ public class EmployeeService {
     private EmployeeRepositoy employeeRepositoy;
 
     public ArrayList<Employee> getEmployees() {
-        return (ArrayList<Employee>) employeeRepositoy.findAll();
-    }
-
-    public Employee findByRut(String rut) {
-        return employeeRepositoy.findByRut(rut);
+        return new ArrayList<>(employeeRepositoy.findAll());
     }
 }

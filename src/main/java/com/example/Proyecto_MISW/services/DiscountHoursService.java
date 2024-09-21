@@ -14,10 +14,6 @@ public class DiscountHoursService {
     @Autowired
     DiscountHoursRepository discountHoursRepository;
 
-    public ArrayList<DiscountHours> getDiscountHours(){
-        return (ArrayList<DiscountHours>) discountHoursRepository.findAll();
-    }
-
     public List<DiscountHours> getDiscountHoursByRut(String rut){
         return (List<DiscountHours>) discountHoursRepository.findByRut(rut);
     }
