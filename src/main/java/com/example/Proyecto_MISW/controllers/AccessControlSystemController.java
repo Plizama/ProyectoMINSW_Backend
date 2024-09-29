@@ -10,6 +10,7 @@ import java.io.IOException;
 
 @RestController
 @RequestMapping("/access-control")
+@CrossOrigin("*")
 public class AccessControlSystemController {
 
     @Autowired
