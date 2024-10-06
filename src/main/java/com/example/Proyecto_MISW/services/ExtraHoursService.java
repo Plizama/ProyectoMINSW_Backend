@@ -60,4 +60,23 @@ public class ExtraHoursService {
 
         return totalApprovedExtraHours;
     }
+    public List<ExtraHours> getExtraHoursByRutAndMonth(String rut, int month, int year) {
+        // Ajustar los parámetros para trabajar con Calendar (meses empiezan desde 0 en Java)
+        Calendar calendar = Calendar.getInstance();
+
+        // Establecer el año y el mes (restar 1 a month porque Calendar usa 0 para enero)
+        calendar.set(Calendar.YEAR, year);
+        calendar.set(Calendar.MONTH, month - 1);
+
+        // Establecer el primer día del mes
+        calendar.set(Calendar.DAY_OF_MONTH, 1);
+        Date startDate = calendar.getTime();
+
+        // Establecer el último día del mes
+        calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
+        Date endDate = calendar.getTime();
+
+        // Obtener todas las horas extra entre las fechas de inicio y fin del mes especificado
+        return extraHoursRepository.findByRutAndDateBetween(rut, startDate, endDate);
+    }
 }

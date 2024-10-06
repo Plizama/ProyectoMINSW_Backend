@@ -27,6 +27,8 @@ public class Paycheck {
     private int discountHours;
     //Pago de horas extra
     private int extraHoursBonus;
+    //Sueldo Bruto
+    private int grossSalary;
     //Descuentos legales
     //Decuentos seguridad social (cotizaciones)
     private int SocialSecurityDiscount;

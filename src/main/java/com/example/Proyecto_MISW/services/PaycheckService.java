@@ -44,6 +44,8 @@ public class PaycheckService {
 
             //Descuentos legales
             int totalSalario = monthlySalary + salaryBonus + extraHoursBonus - discountHours;
+            paycheck.setGrossSalary(totalSalario);
+
             //Decuentos seguridad social (cotizaciones)
             int socialSecurityDiscount = officeHRMService.getSocialSecurityDiscount(totalSalario);
             paycheck.setSocialSecurityDiscount(socialSecurityDiscount);

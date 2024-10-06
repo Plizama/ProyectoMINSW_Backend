@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/paychecks")
+@CrossOrigin("*")
 public class PaycheckController {
     @Autowired
     private PaycheckService paycheckService;
