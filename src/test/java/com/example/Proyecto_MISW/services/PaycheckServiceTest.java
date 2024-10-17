@@ -20,6 +20,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.any;
+
 @SpringBootTest
 public class PaycheckServiceTest {
 
@@ -74,16 +75,15 @@ public class PaycheckServiceTest {
 
         assertThat(result).isTrue();
 
-        //Verificar que repositorio haya almacenado valor
+        // Verificar que el repositorio haya almacenado el valor
         verify(paycheckRepository, times(1)).save(any(Paycheck.class));
     }
 
-
-    //Test para: public Paycheck getPaycheckByRutAndMonth(String rut, int month, int year)
-    //Obtener pagos con rut, y fechas correctas
+    // Test para: public Paycheck getPaycheckByRutAndMonth(String rut, int month, int year)
+    // Obtener pagos con rut y fechas correctas
     @Test
     void paycheckByRutAndMonth_CorrectData() {
-        //Datos almacenaddos
+        // Datos almacenados
         Paycheck paycheck = new Paycheck();
         paycheck.setRut("12.345.678-9");
         paycheck.setMonth(9);
@@ -93,25 +93,24 @@ public class PaycheckServiceTest {
 
         Paycheck result = paycheckService.getPaycheckByRutAndMonth("12.345.678-9", 9, 2024);
 
-        //Verificar datos
+        // Verificar datos
         assertThat(result).isNotNull();
         assertThat(result.getRut()).isEqualTo("12.345.678-9");
         assertThat(result.getMonth()).isEqualTo(9);
         assertThat(result.getYear()).isEqualTo(2024);
     }
 
-    //Obtener pagos con rut incorrecto, y fechas correctas
+    // Test para: public Paycheck getPaycheckByRutAndMonth(String rut, int month, int year)
+    // Obtener pagos con rut incorrecto y fechas correctas
     @Test
     void nonExistentRut_WithStoredData() {
-        //Datos almacenados
+        // Datos almacenados
         Paycheck paycheck = new Paycheck();
         paycheck.setRut("12.345.678-9");
         paycheck.setMonth(9);
         paycheck.setYear(2024);
 
-        given(paycheckRepository.findByRutAndMonthAndYear("12.345.678-9", 9, 2024)).willReturn(paycheck);
-
-        //Rut incorrecto
+        // Rut incorrecto
         given(paycheckRepository.findByRutAndMonthAndYear("10.555.444-1", 9, 2024)).willReturn(null);
 
         Paycheck result = paycheckService.getPaycheckByRutAndMonth("10.555.444-1", 9, 2024);
@@ -119,18 +118,17 @@ public class PaycheckServiceTest {
         assertThat(result).isNull();
     }
 
+    // Test para: public Paycheck getPaycheckByRutAndMonth(String rut, int month, int year)
     // Prueba unitaria para getPaycheckByRutAndMonth con mes no almacenado
     @Test
     void nonExistentMonth_WithStoredData() {
-        //Datos almacenados
+        // Datos almacenados
         Paycheck paycheck = new Paycheck();
         paycheck.setRut("12.345.678-9");
         paycheck.setMonth(9);
         paycheck.setYear(2024);
 
-        given(paycheckRepository.findByRutAndMonthAndYear("12.345.678-9", 9, 2024)).willReturn(paycheck);
-
-        //mes no existente
+        // Mes no existente
         given(paycheckRepository.findByRutAndMonthAndYear("12.345.678-9", 10, 2024)).willReturn(null);
 
         Paycheck result = paycheckService.getPaycheckByRutAndMonth("12.345.678-9", 10, 2024);
@@ -138,3 +136,4 @@ public class PaycheckServiceTest {
         assertThat(result).isNull();
     }
 }
+
