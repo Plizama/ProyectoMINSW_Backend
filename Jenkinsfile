@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment {
-        DB_HOST = '192.168.1.86' // Aquí defines la variable de entorno DB_HOST con la IP de la base de datos
+        DB_HOST = '192.168.1.86'
     }
     tools {
         maven 'maven_3_9_9'
@@ -16,7 +16,6 @@ pipeline {
 
         stage('Unit Tests') {
             steps {
-                // Ejecuta la fase de pruebas con Maven
                 bat 'mvn test'
             }
         }
@@ -32,8 +31,8 @@ pipeline {
         stage('Push image to Docker Hub') {
             steps {
                 script {
-                    withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                        bat 'echo %DOCKER_PASSWORD% | docker login -u %DOCKER_USERNAME% --password-stdin'
+                    withCredentials([string(credentialsId: 'dockerhub-password', variable: 'dhpsw')]) {
+                        bat 'docker login -u plizama -p %dhpsw%'
                     }
                     bat 'docker push plizama/proyecto-misw:latest'
                 }
@@ -41,3 +40,4 @@ pipeline {
         }
     }
 }
+
