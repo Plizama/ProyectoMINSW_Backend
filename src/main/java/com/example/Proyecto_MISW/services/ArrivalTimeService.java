@@ -15,6 +15,7 @@ public class ArrivalTimeService {
     @Autowired
     private ArrivalTimeRepository arrivalTimeRepository;
 
+    //Almacenar hora de llegada con datos de rut y fecha
     public void saveArrivalTime(String rut, LocalDate date, LocalTime arrivalTime) {
         ArrivalTime arrival = new ArrivalTime();
         arrival.setRut(rut);
@@ -23,6 +24,8 @@ public class ArrivalTimeService {
 
         arrivalTimeRepository.save(arrival);
     }
+
+    //Obtener listado de horas de llegada
     public List<ArrivalTime> getAllArrivalTimes() {
         return arrivalTimeRepository.findAll();
     }

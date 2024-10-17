@@ -15,12 +15,17 @@ public class EmployeeService {
     @Autowired
     private EmployeeRepositoy employeeRepositoy;
 
+    //Obtener listado de empleados
     public ArrayList<Employee> getEmployees() {
         return new ArrayList<>(employeeRepositoy.findAll());
     }
+
+    //Obtener empleado por rut
     public Employee getEmployeeByRut(String rut) {
         return employeeRepositoy.findByRut(rut);
     }
+
+    //Calcular años de servicio de empleado
     public int calculateYearsOfService(String rut) {
         Employee employee = employeeRepositoy.findByRut(rut);
         if (employee != null) {
@@ -29,10 +34,10 @@ public class EmployeeService {
                     .toLocalDate();
             LocalDate currentDate = LocalDate.now();
 
-            // Calcular la diferencia en años
+            // Calcular la diferencia en años desde el registro a fecha actual
             return Period.between(registrationDate, currentDate).getYears();
         } else {
-            // En caso de que el empleado no exista, retorna -1 o lanza una excepción
+            // En caso de que el empleado no exista:
             return -1;
         }
     }

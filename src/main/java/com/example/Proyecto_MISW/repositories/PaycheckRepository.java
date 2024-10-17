@@ -10,9 +10,10 @@ import java.util.List;
 
 @Repository
 public interface PaycheckRepository extends JpaRepository<Paycheck, Long> {
+    //lista de pagos segun fecha (mes y año)
     @Query(value = "SELECT * FROM paychecks WHERE paychecks.year = :year AND paychecks.month = :month ORDER BY paychecks.year, paychecks.month, paychecks.rut", nativeQuery = true)
     List<Paycheck> getPaychecksByYearMonth(@Param("year") int year, @Param("month") int month);
-
+    //Pago segun mes, año y rut
     Paycheck findByRutAndMonthAndYear(String rut, int month, int year);
 
 }

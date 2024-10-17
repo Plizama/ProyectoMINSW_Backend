@@ -17,14 +17,14 @@ public class DiscountHoursController {
     @Autowired
     private DiscountHoursService discountHoursService;
 
-    // Endpoint para aprobar las horas de descuento por RUT formato: ...approve/12.345.678-9/2024-09-16
+    // Controlador para aprobar horas de descuento. formato: ...approve/12.345.678-9/2024-09-16
     @PutMapping("/approve/{rut}/{date}")
     public ResponseEntity<Void> approveDiscountHours(@PathVariable String rut,
                                                      @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date date) {
         discountHoursService.approveDiscountHoursByRutAndDate(rut, date);
-        // Retorna un ResponseEntity vacío indicando éxito (204 No Content)
         return ResponseEntity.noContent().build();
     }
+    //Controlador obtiene descuentos segun rut, mes y año
     @GetMapping("/getByRutAndMonth/{rut}/{month}/{year}")
     public ResponseEntity<List<DiscountHours>> getDiscountHoursByRutAndMonth(
             @PathVariable String rut,

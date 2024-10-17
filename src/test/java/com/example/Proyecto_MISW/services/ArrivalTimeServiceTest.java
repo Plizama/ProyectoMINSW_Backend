@@ -34,15 +34,16 @@ public class ArrivalTimeServiceTest {
     }
 
     // Test para: public void saveArrivalTime(String rut, LocalDate date, LocalTime arrivalTime)
-    //Guarda datos de entrada
+    //Guarda datos de llegada
     @Test
     public void testSaveArrivalTime() {
+        //Datos de fecja, rut y hora de llegada
         String rut = "12.345.678-9";
         LocalDate date = LocalDate.of(2024, 9, 19);
         LocalTime arrivalTime = LocalTime.of(8, 5);
 
         arrivalTimeService.saveArrivalTime(rut, date, arrivalTime);
-
+        //Verificar que almacena los datos indicados
         verify(arrivalTimeRepository, times(1)).save(argThat(arrival ->
                 arrival.getRut().equals(rut) &&
                         arrival.getDate().equals(java.sql.Date.valueOf(date)) &&
@@ -54,6 +55,7 @@ public class ArrivalTimeServiceTest {
     //Obtiene datos de llegada almacenados en lista
     @Test
     public void testGetAllArrivalTimes_withArrivalTimes() {
+        //Creacion de lista de llegadas
         ArrivalTime arrival1 = new ArrivalTime();
         arrival1.setRut("12.345.678-9");
         arrival1.setDate(java.sql.Date.valueOf(LocalDate.of(2024, 9, 19)));
@@ -71,7 +73,7 @@ public class ArrivalTimeServiceTest {
         given(arrivalTimeRepository.findAll()).willReturn(arrivalTimes);
 
         List<ArrivalTime> result = arrivalTimeService.getAllArrivalTimes();
-
+        //verifica que haya almacenado las horas de llegada.
         assertThat(result).isNotEmpty();
         assertThat(result).hasSize(2);
         assertThat(result).extracting(ArrivalTime::getRut).contains("12.345.678-9", "7.654.321-0");
@@ -85,7 +87,7 @@ public class ArrivalTimeServiceTest {
         given(arrivalTimeRepository.findAll()).willReturn(arrivalTimes);
 
         List<ArrivalTime> result = arrivalTimeService.getAllArrivalTimes();
-
+        //Verificar que no almaceno nada
         assertThat(result).isEmpty();
         assertThat(result).hasSize(0);
     }

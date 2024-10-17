@@ -32,6 +32,7 @@ public class AccessControlSystemService {
     @Autowired
     private EmployeeService employeeService;
 
+    //Procesar archivo, y almacenar horas de ingreso y salida, además de identificar trabajadores que no asistieron
     public void processAccessFile(InputStream inputStream) {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
             //Lee archivo por lineas
@@ -39,12 +40,14 @@ public class AccessControlSystemService {
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
             DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
 
-            // Mapa para almacenar las horas de ingreso y salida por RUT y fecha
+            // Mapeo para ingresar horas de entrada y salida a partir de rut y fecha.
             Map<String, List<LocalTime>> accessMap = new HashMap<>();
-            Map<String, Set<String>> employeeAccessByDate = new HashMap<>(); // Para almacenar RUTs por fecha
+            //Mapeo para ingresar empleados en cada fecha
+            Map<String, Set<String>> employeeAccessByDate = new HashMap<>();
 
-            // Obtener la lista de todos los empleados desde el servicio
+            // Obtener la lista de todos los empleados
             List<Employee> employees = employeeService.getEmployees();
+            //Se obtiene rut de cada empleado desde conjunto
             Set<String> allRuts = employees.stream().map(Employee::getRut).collect(Collectors.toSet());
 
             // Recorrer todas las líneas del archivo
@@ -57,21 +60,24 @@ public class AccessControlSystemService {
                 // Generar clave única por RUT y fecha
                 String key = rut + "_" + date.toString();
 
-                // Añadir la hora de ingreso/salida al mapa
+                // Añadir la hora de ingreso/salida al mapeo
                 accessMap.computeIfAbsent(key, k -> new ArrayList<>()).add(time);
 
                 // Almacenar RUT por fecha
                 String dateKey = date.toString();
+                //agrega la hora de acceso al Map accessMap
                 employeeAccessByDate.computeIfAbsent(dateKey, k -> new HashSet<>()).add(rut);
             }
 
             // Procesar cada trabajador
             for (Map.Entry<String, List<LocalTime>> entry : accessMap.entrySet()) {
+                //separa fecha de rut
                 String[] keyParts = entry.getKey().split("_");
                 String rut = keyParts[0];
                 LocalDate date = LocalDate.parse(keyParts[1]);
-
+                // lista de horas del ruy y la fecha
                 List<LocalTime> times = entry.getValue();
+                // si hay dos horas una es entrada y la otra salida
                 if (times.size() >= 2) {
                     // Ordenar las horas por si están desordenadas
                     Collections.sort(times);
@@ -80,13 +86,13 @@ public class AccessControlSystemService {
                     LocalTime ingresoTime = times.get(0);
                     LocalTime salidaTime = times.get(1);
 
-                    // Almacenar horas de entrada y salida utilizando los servicios correspondientes
+                    // Almacenar horas de entrada y salida utilizando los servicios
                     arrivalTimeService.saveArrivalTime(rut, date, ingresoTime);
                     departureTimeService.saveDepartureTime(rut, date, salidaTime);
                 }
             }
 
-            // Verificar que todos los empleados tengan registros por fecha
+            // Verificar que todos los empleados tengan registros por fecha (para casos de ausencia)
             for (Map.Entry<String, Set<String>> dateEntry : employeeAccessByDate.entrySet()) {
                 LocalDate date = LocalDate.parse(dateEntry.getKey());
 
@@ -112,12 +118,12 @@ public class AccessControlSystemService {
         }
     }
 
-
+    //Procesa horas de llegada para calcular horas de descuento por atrasos
     public void processArrivalTimesForDiscounts() {
         // Obtener todos los registros de llegada
         List<ArrivalTime> arrivalTimes = arrivalTimeService.getAllArrivalTimes();
 
-        // Definir la hora de inicio del trabajo (08:00)
+        // Hora de inicio del trabajo (08:00)
         LocalTime startWorkTime = LocalTime.of(8, 0);
 
         // Procesar cada llegada
@@ -126,7 +132,7 @@ public class AccessControlSystemService {
 
             // Si la hora de llegada es posterior a las 08:00
             if (arrivalTime.isAfter(startWorkTime)) {
-                // Calcular los minutos de retraso
+                // Calcular los minutos de atraso
                 long minutesLate = Duration.between(startWorkTime, arrivalTime).toMinutes();
 
                 // Crear un nuevo registro de DiscountHours

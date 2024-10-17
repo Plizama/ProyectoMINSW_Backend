@@ -37,12 +37,14 @@ public class DepartureTimeServiceTest {
     //Guarda datos de salida.
     @Test
     public void testSaveDepartureTime() {
+        //Creacion de datos
         String rut = "12.345.678-9";
         LocalDate date = LocalDate.of(2024, 9, 19);
         LocalTime departureTime = LocalTime.of(18, 0);
 
         departureTimeService.saveDepartureTime(rut, date, departureTime);
 
+        //Verifica si es llamado el repositorio y si almacena los datos
         verify(departureTimeRepository, times(1)).save(argThat(departure ->
                 departure.getRut().equals(rut) &&
                         departure.getDate().equals(java.sql.Date.valueOf(date)) &&
@@ -54,6 +56,7 @@ public class DepartureTimeServiceTest {
     //Obtiene listado de salida guardadas
     @Test
     public void testGetAllDepartureTimes_withDepartureTimes() {
+        //Creacion de listado de Salidas
         DepartureTime departure1 = new DepartureTime();
         departure1.setRut("12.345.678-9");
         departure1.setDate(java.sql.Date.valueOf(LocalDate.of(2024, 9, 19)));
@@ -70,6 +73,7 @@ public class DepartureTimeServiceTest {
 
         given(departureTimeRepository.findAll()).willReturn(departureTimes);
 
+        //Verifica que contenga salidas creada anteriormente
         List<DepartureTime> result = departureTimeService.getAllDepartureTimes();
         assertThat(result).isNotEmpty();
         assertThat(result).hasSize(2);

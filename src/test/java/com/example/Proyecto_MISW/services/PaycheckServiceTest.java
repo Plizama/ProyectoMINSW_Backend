@@ -9,7 +9,10 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,33 +40,50 @@ public class PaycheckServiceTest {
     }
 
     // Test para: public Boolean calculatePaychecks (int month, int year)
+    //Calcula un pago
     @Test
     void calculateSomePaychecks() {
 
+        // Creación empleado
         List<Employee> employees = new ArrayList<>();
-        Employee employee1 = new Employee();
-        employee1.setRut("12.345.678-9");
-        employee1.setCategory("A");
+        Employee employee1 = new Employee(
+                1L,
+                "12.345.678-9",
+                "Juan",
+                "Perez",
+                "A",
+                Date.from(LocalDate.of(2018, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant())
+        );
         employees.add(employee1);
 
         given(employeeService.getEmployees()).willReturn((ArrayList<Employee>) employees);
+        // Salario fijo
         given(officeHRMService.getFixedMonthlySalary(employee1)).willReturn(1700000);
+        // Bonificación por antigüedad
         given(officeHRMService.getSalaryBonus(employee1)).willReturn(170000);
+        // Descuento por atraso
         given(officeHRMService.salaryDiscountArrears(employee1, 9, 2024)).willReturn(0);
+        // Bonificación por horas extra
         given(officeHRMService.getExtraHoursBonus(employee1, 9, 2024)).willReturn(250000);
+        // Descuento de seguridad social
         given(officeHRMService.getSocialSecurityDiscount(2120000)).willReturn(212000);
+        // Descuento de salud
         given(officeHRMService.getHealthDiscount(2120000)).willReturn(169600);
 
         Boolean result = paycheckService.calculatePaychecks(9, 2024);
 
         assertThat(result).isTrue();
+
+        //Verificar que repositorio haya almacenado valor
         verify(paycheckRepository, times(1)).save(any(Paycheck.class));
     }
+
 
     //Test para: public Paycheck getPaycheckByRutAndMonth(String rut, int month, int year)
     //Obtener pagos con rut, y fechas correctas
     @Test
     void paycheckByRutAndMonth_CorrectData() {
+        //Datos almacenaddos
         Paycheck paycheck = new Paycheck();
         paycheck.setRut("12.345.678-9");
         paycheck.setMonth(9);
@@ -73,6 +93,7 @@ public class PaycheckServiceTest {
 
         Paycheck result = paycheckService.getPaycheckByRutAndMonth("12.345.678-9", 9, 2024);
 
+        //Verificar datos
         assertThat(result).isNotNull();
         assertThat(result.getRut()).isEqualTo("12.345.678-9");
         assertThat(result.getMonth()).isEqualTo(9);
@@ -82,6 +103,7 @@ public class PaycheckServiceTest {
     //Obtener pagos con rut incorrecto, y fechas correctas
     @Test
     void nonExistentRut_WithStoredData() {
+        //Datos almacenados
         Paycheck paycheck = new Paycheck();
         paycheck.setRut("12.345.678-9");
         paycheck.setMonth(9);
@@ -89,6 +111,7 @@ public class PaycheckServiceTest {
 
         given(paycheckRepository.findByRutAndMonthAndYear("12.345.678-9", 9, 2024)).willReturn(paycheck);
 
+        //Rut incorrecto
         given(paycheckRepository.findByRutAndMonthAndYear("10.555.444-1", 9, 2024)).willReturn(null);
 
         Paycheck result = paycheckService.getPaycheckByRutAndMonth("10.555.444-1", 9, 2024);
@@ -99,6 +122,7 @@ public class PaycheckServiceTest {
     // Prueba unitaria para getPaycheckByRutAndMonth con mes no almacenado
     @Test
     void nonExistentMonth_WithStoredData() {
+        //Datos almacenados
         Paycheck paycheck = new Paycheck();
         paycheck.setRut("12.345.678-9");
         paycheck.setMonth(9);
@@ -106,6 +130,7 @@ public class PaycheckServiceTest {
 
         given(paycheckRepository.findByRutAndMonthAndYear("12.345.678-9", 9, 2024)).willReturn(paycheck);
 
+        //mes no existente
         given(paycheckRepository.findByRutAndMonthAndYear("12.345.678-9", 10, 2024)).willReturn(null);
 
         Paycheck result = paycheckService.getPaycheckByRutAndMonth("12.345.678-9", 10, 2024);

@@ -16,6 +16,8 @@ public class PaycheckService {
     EmployeeService employeeService;
     @Autowired
     OfficeHRMService officeHRMService;
+
+    //Calculo de Pagos con descuentos y bonos
     public Boolean calculatePaychecks (int month, int year){
         List<Employee> employees = employeeService.getEmployees();
 
@@ -63,6 +65,7 @@ public class PaycheckService {
         return true;
     }
 
+    //Obtener pagos segun rut, mes y año
     public Paycheck getPaycheckByRutAndMonth(String rut, int month, int year) {
         return paycheckRepository.findByRutAndMonthAndYear(rut, month, year);
     }

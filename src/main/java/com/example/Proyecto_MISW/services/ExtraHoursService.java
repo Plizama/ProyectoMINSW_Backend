@@ -15,9 +15,12 @@ public class ExtraHoursService {
     @Autowired
     private ExtraHoursRepository extraHoursRepository;
 
+    //Guardar horas extra
     public void saveExtraHours(ExtraHours extraHours) {
         extraHoursRepository.save(extraHours);
     }
+
+    //Aprobar horas extra
     public void approveExtraHoursByRutAndDate(String rut, Date date) {
         // Obtener los registros con el RUT y la fecha proporcionada
         List<ExtraHours> extraHoursList = extraHoursRepository.findByRutAndDate(rut, date);
@@ -30,7 +33,8 @@ public class ExtraHoursService {
             }
         }
     }
-    // Función para sumar horas extra aprobadas en un mes y año específicos . Formato : ("12345678-9", 10, 2024)
+
+    // Sumar horas extra aprobadas en un mes y año específicos. Formato consulta : ("12345678-9", 10, 2024)
     public int getTotalApprovedExtraHoursByRutAndMonth(String rut, int month, int year) {
         // Ajustar los parámetros para trabajar con Calendar (meses empiezan desde 0 en Java)
         Calendar calendar = Calendar.getInstance();
@@ -60,8 +64,10 @@ public class ExtraHoursService {
 
         return totalApprovedExtraHours;
     }
+
+    //Obtener listado de horas extra segun rut y mes
     public List<ExtraHours> getExtraHoursByRutAndMonth(String rut, int month, int year) {
-        // Ajustar los parámetros para trabajar con Calendar (meses empiezan desde 0 en Java)
+        // Ajustar los parámetros para trabajar con Calendar (meses empiezan desde 0)
         Calendar calendar = Calendar.getInstance();
 
         // Establecer el año y el mes (restar 1 a month porque Calendar usa 0 para enero)

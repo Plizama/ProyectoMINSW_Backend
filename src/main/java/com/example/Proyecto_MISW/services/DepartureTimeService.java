@@ -15,6 +15,7 @@ public class DepartureTimeService {
     @Autowired
     private DepartureTimeRepository departureTimeRepository;
 
+    //Almacena horas de salida
     public void saveDepartureTime(String rut, LocalDate date, LocalTime departureTime) {
         DepartureTime departure = new DepartureTime();
         departure.setRut(rut);
@@ -23,6 +24,8 @@ public class DepartureTimeService {
 
         departureTimeRepository.save(departure);
     }
+
+    //Obtiene listado de horas de Salida
     public List<DepartureTime> getAllDepartureTimes() {
         return departureTimeRepository.findAll();
     }

@@ -16,7 +16,7 @@ public class AccessControlSystemController {
     @Autowired
     private AccessControlSystemService accessControlSystemService;
 
-    // Endpoint para procesar el archivo de control de acceso a partir de un archivo subido
+    // Controlador procesa archivo y llama accessControlSystemService
     @PostMapping("/process-file")
     public ResponseEntity<Void> processAccessFile(@RequestParam("file") MultipartFile file) {
         if (file.isEmpty()) {
@@ -24,7 +24,6 @@ public class AccessControlSystemController {
             return ResponseEntity.badRequest().build();
         }
         try {
-            // Llamar al servicio para procesar el archivo utilizando InputStream
             accessControlSystemService.processAccessFile(file.getInputStream());
 
             // Retorna un 204 No Content si el archivo se procesó correctamente
@@ -35,11 +34,14 @@ public class AccessControlSystemController {
             return ResponseEntity.status(500).build();
         }
     }
+
+    //Controlador llama servicio que procesa horas extra.
     @PostMapping("/process-extra-hours")
     public ResponseEntity<Void> processExtraHours() {
         accessControlSystemService.processDepartureTimesForExtraHours();
         return ResponseEntity.noContent().build();
     }
+    //Controlador llama servicio que procesa descuentos.
     @PostMapping("/process-discounts")
     public ResponseEntity<Void> processDiscounts() {
         accessControlSystemService.processArrivalTimesForDiscounts();

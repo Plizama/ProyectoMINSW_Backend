@@ -13,12 +13,13 @@ public class PaycheckController {
     @Autowired
     private PaycheckService paycheckService;
 
-    // Endpoint para calcular las nóminas para un mes y año específicos con respuesta vacía
+    // Controlador llama a funcion que calcula nominas segun mes y año
     @GetMapping("/calculate/{year}/{month}")
     public ResponseEntity<Void> calculatePaychecks(@PathVariable int year, @PathVariable int month) {
         paycheckService.calculatePaychecks(month, year);
         return ResponseEntity.noContent().build();
     }
+    //Controlador llama a funcion que muestra detalles de nominas de pago
     @GetMapping("/paycheck/{rut}/{year}/{month}")
     public ResponseEntity<Paycheck> getPaycheckDetails(@PathVariable String rut,
                                                        @PathVariable int year,

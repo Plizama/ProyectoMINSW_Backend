@@ -9,8 +9,11 @@ import java.util.List;
 
 @Repository
 public interface ExtraHoursRepository extends JpaRepository<ExtraHours, Long> {
+
+    //Obtener lista de horas extra segun rut ingresado
     public List<ExtraHours> findByRut(String rut);
+    //Obtener listado de horas extra segun rut y fecha
     List<ExtraHours> findByRutAndDate(String rut, Date date);
-    // Método para obtener las horas extra dentro de un rango de fechas
+    // Obtener listado de horas extra segun rango de fechas
     List<ExtraHours> findByRutAndDateBetween(String rut, Date startDate, Date endDate);
 }
