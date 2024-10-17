@@ -14,7 +14,7 @@ pipeline {
         stage('Unit Tests') {
             steps {
                 // Run Maven 'test' phase. It compiles the test sources and runs the unit tests
-                bat 'mvn test' // Use 'bat' for Windows agents or 'sh' for Unix/Linux agents
+                bat 'mvn test'
             }
         }
 
@@ -25,15 +25,18 @@ pipeline {
                 }
             }
         }
+
         stage('Push image to Docker Hub'){
             steps{
                 script {
                     withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                        bat 'docker login -u %DOCKER_USERNAME% -p %DOCKER_PASSWORD%'
+                        bat 'echo %DOCKER_PASSWORD% | docker login -u %DOCKER_USERNAME% --password-stdin'
                     }
                     bat 'docker push plizama/proyecto-misw:latest'
                 }
             }
         }
     }
+}
+
 }
